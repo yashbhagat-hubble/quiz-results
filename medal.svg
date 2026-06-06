@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Gold medal">
+  <defs>
+    <radialGradient id="gold" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFF6C8"/>
+      <stop offset="45%" stop-color="#F5C518"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </radialGradient>
+    <pattern id="dots" width="4" height="4" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="0.6" fill="rgba(255,255,255,0.35)"/>
+    </pattern>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="29" fill="url(#gold)" stroke="#B8860B" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="29" fill="none" stroke="rgba(255,230,120,0.65)" stroke-width="4.5"/>
+  <circle cx="32" cy="32" r="22" fill="none" stroke="rgba(120,75,0,0.35)" stroke-width="1.5"/>
+  <circle cx="32" cy="32" r="24" fill="url(#dots)" opacity="0.55"/>
+  <circle cx="32" cy="32" r="18" fill="none" stroke="rgba(255,240,180,0.45)" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>
+  <path d="M18 18 A22 22 0 0 1 32 12 A22 22 0 0 1 46 18" fill="none" stroke="url(#shine)" stroke-width="8" stroke-linecap="round" opacity="0.55"/>
+  <text x="32" y="38" text-anchor="middle" font-family="Figtree, Arial, sans-serif" font-size="22" font-weight="800" fill="#3D2800">1</text>
+</svg>

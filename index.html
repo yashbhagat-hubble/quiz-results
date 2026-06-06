@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSVP Shenanigans — Scrapbook</title>
+<link rel="icon" href="medal.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="medal.svg">
+<meta name="description" content="RSVP Shenanigans — friends group quiz">
+<meta property="og:title" content="RSVP Shenanigans">
+<meta property="og:description" content="Friends group quiz — time to see the responses">
+<meta property="og:image" content="medal.svg">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F5F0E8;
+    --cork: #D9CEBB;
+    --ink: #3D2B1F;
+    --ink-faded: rgba(61, 43, 31, 0.55);
+    --paper: #FFFEF9;
+    --tape: rgba(255, 235, 190, 0.72);
+    --ui-ink-faded: rgba(61, 43, 31, 0.45);
+    --ui-btn-bg: rgba(61, 43, 31, 0.08);
+    --ui-btn-hover: rgba(61, 43, 31, 0.14);
+  }
+
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    font-family: 'Figtree', sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+  }
+
+  .scrapbook-bg {
+    background-color: var(--cream);
+    background-image:
+      radial-gradient(ellipse 120% 80% at 20% 10%, rgba(255,255,255,.45) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 70% at 85% 90%, rgba(180,150,110,.12) 0%, transparent 50%),
+      repeating-radial-gradient(circle at 15% 25%, rgba(61,43,31,.025) 0 1px, transparent 1px 4px),
+      repeating-radial-gradient(circle at 75% 65%, rgba(61,43,31,.02) 0 1px, transparent 1px 5px),
+      linear-gradient(160deg, #EDE4D4 0%, var(--cork) 45%, #E8DFD0 100%);
+  }
+
+  #deck { width: 100%; height: 100%; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease;
+    overflow: hidden;
+  }
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  .doodle-glass {
+    position: absolute;
+    top: 18%; right: 10%;
+    font-size: 42px;
+    color: rgba(61, 43, 31, 0.18);
+    transform: rotate(8deg);
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+  }
+
+  /* ── HOMEPAGE ─────────────────────────── */
+  #home {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+  }
+
+  .home-text {
+    position: relative;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .home-label {
+    display: inline-block;
+    position: relative;
+    background: var(--paper);
+    padding: 14px 28px 12px;
+    box-shadow: 0 6px 24px rgba(61,43,31,.1);
+    transform: rotate(-1.5deg);
+    margin-bottom: 28px;
+  }
+  .home-label::before,
+  .home-label::after {
+    content: '';
+    position: absolute;
+    width: 52px; height: 22px;
+    background: var(--tape);
+    border: 1px solid rgba(180,155,110,.25);
+    top: -10px;
+  }
+  .home-label::before { left: 18%; transform: rotate(-8deg); }
+  .home-label::after  { right: 18%; transform: rotate(6deg); }
+
+  .home-title {
+    font-size: 72px;
+    font-weight: 600;
+    line-height: .95;
+    color: var(--ink);
+    letter-spacing: -.01em;
+  }
+
+  .home-sub {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink-faded);
+  }
+
+  /* ── END SLIDE ─────────────────────────── */
+  #end {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .end-text {
+    position: relative;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .end-title {
+    font-size: 72px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -.02em;
+  }
+
+  .avatar-field {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .av-wrap {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: center center;
+  }
+
+  /* ── POLAROID ─────────────────────────── */
+  .polaroid {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    padding: 7px 7px 0;
+    box-shadow:
+      0 1px 2px rgba(61,43,31,.08),
+      0 8px 28px rgba(61,43,31,.14);
+  }
+  .polaroid-photo {
+    overflow: hidden;
+    background: #eee;
+    flex-shrink: 0;
+  }
+  .polaroid-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .polaroid-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-faded);
+    text-align: center;
+    line-height: 1;
+  }
+
+  .av-wrap .polaroid { width: 88px; }
+  .av-wrap .polaroid-photo { width: 74px; height: 74px; }
+
+  /* pushpin */
+  .pushpin {
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e8e8e8, #888 55%, #555);
+    box-shadow: 0 2px 4px rgba(0,0,0,.25);
+    z-index: 2;
+  }
+
+  /* ── QUESTION NUMBER ── */
+  #q-corner {
+    position: fixed; top: 28px; right: 36px;
+    font-size: 16px; font-weight: 600;
+    color: var(--ui-ink-faded);
+    z-index: 200;
+    display: none;
+  }
+
+  /* ── QUESTION SLIDES ──────────────────── */
+  .q-slide {
+    position: absolute;
+    inset: 0;
+    isolation: isolate;
+  }
+
+  .q-inner {
+    position: absolute;
+    left: 50%;
+    width: min(820px, 92vw);
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    text-align: center;
+    transform-origin: top center;
+    transition:
+      top .7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform .7s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1;
+  }
+
+  .q-slide[data-phase="a"] .q-inner {
+    top: 24px;
+    transform: translateX(-50%) translateY(0) scale(.42);
+    transform-origin: top center;
+  }
+
+  .q-card {
+    position: relative;
+    background: var(--paper);
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 31px,
+      rgba(180, 160, 140, 0.14) 31px,
+      rgba(180, 160, 140, 0.14) 32px
+    );
+    padding: 44px 36px 32px;
+    box-shadow: 0 10px 40px rgba(61,43,31,.12);
+    transform: rotate(-1.2deg);
+  }
+
+  .q-tape-top,
+  .q-tape-side {
+    position: absolute;
+    background: var(--tape);
+    border: 1px solid rgba(180,155,110,.22);
+    pointer-events: none;
+  }
+  .q-tape-top {
+    width: 90px; height: 26px;
+    top: -11px; left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+  }
+  .q-tape-side {
+    width: 26px; height: 56px;
+    top: 18px; left: -10px;
+    transform: rotate(-6deg);
+  }
+
+  .q-text {
+    font-size: 80px;
+    font-weight: 600;
+    line-height: 1.08;
+    color: var(--ink);
+    letter-spacing: -.03em;
+  }
+
+  .q-hint {
+    margin-top: 24px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink-faded);
+    transition: opacity .3s ease;
+  }
+  .q-slide[data-phase="a"] .q-hint { opacity: 0; }
+
+  /* ── ANSWERS SECTION ──────────────────── */
+  .a-section {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 20px 70px;
+    gap: 32px;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(100%);
+    transition:
+      transform .7s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity .7s cubic-bezier(0.16, 1, 0.3, 1),
+      visibility .7s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .q-slide[data-phase="a"] .a-section {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .ans-av-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .ans-polaroid {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    padding: 10px 10px 0;
+    box-shadow:
+      0 1px 2px rgba(61,43,31,.08),
+      0 10px 32px rgba(61,43,31,.16);
+  }
+  .ans-polaroid .polaroid-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+
+  .ans-winner .ans-polaroid {
+    transform: rotate(var(--rot, 1.5deg));
+  }
+  .ans-winner .polaroid-photo {
+    width: 180px; height: 180px;
+  }
+  .ans-winner .polaroid-label {
+    height: 34px;
+    font-size: 20px;
+    color: var(--ink);
+  }
+
+  .ans-other .ans-polaroid {
+    padding: 6px 6px 0;
+    transform: rotate(var(--rot, 0deg));
+  }
+  .ans-other .polaroid-photo {
+    width: 72px; height: 72px;
+  }
+  .ans-other .polaroid-label {
+    height: 22px;
+    font-size: 14px;
+  }
+
+  /* vote medals */
+  .ans-badge.sticker {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    border-radius: 50%;
+    border: none;
+    transform: rotate(var(--sticker-rot, 8deg));
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .ans-badge.sticker .medal-num {
+    position: relative;
+    z-index: 3;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -.04em;
+    text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  }
+
+  /* inner dashed ring */
+  .ans-badge.sticker::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(255,255,255,.28);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* highlight sweep */
+  .ans-badge.sticker::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 210deg,
+      transparent 0deg,
+      rgba(255,255,255,.42) 35deg,
+      transparent 70deg
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .ans-badge.sticker.gold {
+    color: #3D2800;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 52%, rgba(120,75,0,.45) 53%, rgba(200,150,20,.55) 56%, transparent 57%),
+      radial-gradient(circle at 50% 50%, transparent 66%, rgba(255,220,80,.35) 67%, transparent 68%),
+      repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.18) 0 0.8px, transparent 0.8px 3.5px),
+      linear-gradient(155deg, #FFF6C8 0%, #FFE566 22%, #F5C518 48%, #C8960C 72%, #8B6914 100%);
+    box-shadow:
+      0 0 0 2.5px #B8860B,
+      0 0 0 4.5px rgba(255,230,120,.55),
+      0 5px 16px rgba(70,45,0,.32),
+      inset 0 2px 5px rgba(255,255,255,.55),
+      inset 0 -3px 7px rgba(90,55,0,.28);
+  }
+
+  .ans-badge.sticker.gold::before {
+    border-color: rgba(255,240,180,.35);
+    box-shadow: inset 0 0 0 1px rgba(139,90,0,.2);
+  }
+
+  .ans-badge.sticker.silver {
+    color: #1E1E1E;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 52%, rgba(80,80,80,.4) 53%, rgba(170,170,170,.5) 56%, transparent 57%),
+      radial-gradient(circle at 50% 50%, transparent 66%, rgba(255,255,255,.3) 67%, transparent 68%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.1) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 1px, transparent 1px 3px),
+      linear-gradient(155deg, #FAFAFA 0%, #E0E0E0 25%, #B8B8B8 50%, #888888 75%, #606060 100%);
+    box-shadow:
+      0 0 0 2.5px #7A7A7A,
+      0 0 0 4.5px rgba(220,220,220,.65),
+      0 5px 16px rgba(0,0,0,.22),
+      inset 0 2px 5px rgba(255,255,255,.65),
+      inset 0 -3px 7px rgba(0,0,0,.18);
+  }
+
+  .ans-badge.sticker.silver::before {
+    border-color: rgba(255,255,255,.32);
+    box-shadow: inset 0 0 0 1px rgba(60,60,60,.15);
+  }
+
+  .ans-badge.sticker.sm {
+    top: -12px; right: -14px;
+    width: 42px;
+    height: 42px;
+  }
+  .ans-badge.sticker.sm .medal-num { font-size: 18px; }
+
+  .ans-badge.sticker.lg {
+    top: 2px; right: -22px;
+    width: 58px;
+    height: 58px;
+  }
+  .ans-badge.sticker.lg .medal-num { font-size: 26px; }
+
+  .ans-winners {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 28px;
+    max-width: 920px;
+    width: 100%;
+  }
+
+  .ans-winner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .ans-others {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px 18px;
+    max-width: 920px;
+    width: 100%;
+  }
+
+  .ans-other {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── BOTTOM NAV ───────────────────────── */
+  #bottom-nav {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 16px;
+    z-index: 200;
+  }
+
+  .nav-hint {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ui-ink-faded);
+    white-space: nowrap;
+  }
+
+  .nav-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--ui-btn-bg);
+    border: 1px solid rgba(61,43,31,.08);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--ui-ink-faded);
+    transition: background .15s, transform .1s;
+    flex-shrink: 0;
+  }
+  .nav-btn:hover { background: var(--ui-btn-hover); }
+  .nav-btn:active { transform: scale(.92); }
+
+  @media (max-width: 600px) {
+    .q-text       { font-size: 48px; }
+    .home-title   { font-size: 48px; }
+    .end-title    { font-size: 48px; }
+    .ans-winner .polaroid-photo { width: 130px; height: 130px; }
+    .ans-other .polaroid-photo  { width: 58px; height: 58px; }
+    #q-corner     { right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="q-corner"></div>
+<div id="deck"></div>
+
+<div id="bottom-nav">
+  <button class="nav-btn" id="btn-prev"><i class="ph ph-arrow-left"></i></button>
+  <span class="nav-hint">Use arrow keys to navigate</span>
+  <button class="nav-btn" id="btn-next"><i class="ph ph-arrow-right"></i></button>
+</div>
+
+<script>
+const FRIENDS = [
+  { name: 'Bharat',  color: '#FF5C00', bg: '#FFE4D0', img: 'imgs/bharat.jpg' },
+  { name: 'Rosh',    color: '#8B2FFF', bg: '#E8D8FF', img: 'imgs/rosh.jpg'   },
+  { name: 'Jahnvi',  color: '#E8005A', bg: '#FFD0E4', img: 'imgs/jahnvi.jpg' },
+  { name: 'Harsha',  color: '#009960', bg: '#C8F0DC', img: 'imgs/harsha.jpg' },
+  { name: 'Bhawana', color: '#1460F0', bg: '#D0E0FF', img: 'imgs/bhawana.jpg'},
+  { name: 'Yajur',   color: '#B08000', bg: '#FFF0B8', img: 'imgs/yajur.jpg'  },
+  { name: 'Yash',    color: '#E82020', bg: '#FFD0D0', img: 'imgs/yash.jpg'   },
+  { name: 'Ashish',  color: '#007AAA', bg: '#C8ECFA', img: 'imgs/ashish.jpg' },
+  { name: 'Prerna',  color: '#CC0070', bg: '#FFD0EE', img: 'imgs/prerna.jpg' },
+];
+const fmap = {};
+FRIENDS.forEach(f => fmap[f.name] = f);
+
+const SCATTER = [
+  { x: 8,  y: 12, rot: -9  },
+  { x: 82, y: 8,  rot: 7   },
+  { x: 6,  y: 68, rot: 5   },
+  { x: 88, y: 72, rot: -6  },
+  { x: 22, y: 38, rot: -4  },
+  { x: 76, y: 42, rot: 8   },
+  { x: 14, y: 82, rot: 3   },
+  { x: 72, y: 18, rot: -7  },
+  { x: 93, y: 52, rot: 5   },
+];
+
+const OTHER_ROTS = [-4, 3, -2, 5, -5, 2, -3, 4];
+
+const QUESTIONS = [
+  'Who dies first in a horror movie?',
+  'Who would survive the longest in a zombie apocalypse?',
+  'Who is most likely to get arrested?',
+  'Who is most likely to help bail you out?',
+  "Who'd lose a fight with an elderly person?",
+  'Who has the most rizz?',
+  'Who is most likely to be in a situationship?',
+  "Who's always late?",
+  "Who's the funniest?",
+  "Who's most likely to be admitted to a psych ward?",
+  'Who would you trust the most with your children?',
+  'Who would you NOT trust with your children?',
+  'Who is most likely to become famous?',
+  'Who would get cancelled online first?',
+  'Who is the alcoholic?',
+  'Who would definitely cry after 2 drinks?',
+  'Who gives the worst advice?',
+  'Who would fold first in an interrogation?',
+  'Who has the worst decision-making skills?',
+  "Who has the worst 'I can fix them' syndrome?",
+  'Who would flirt for fun and regret it later?',
+  'Who would be exposed if their search history leaked?',
+  'Who would accidentally start drama and then disappear?',
+  'Who is most likely to die single?',
+  'Who looks like a baddie, but is actually a softie?',
+  'Who looks like a softie, but is actually a baddie?',
+  'Who is most likely to get scammed and not even know it?',
+];
+
+const RESPONSES = [
+  ['Bharat','Rosh','Jahnvi','Harsha','Bhawana','Bharat','Bharat','Yajur','Yash','Rosh','Bharat','Jahnvi','Yash','Jahnvi','Harsha','Bharat','Ashish','Prerna','Harsha','Jahnvi','Yajur','Jahnvi','Yajur','Jahnvi','Ashish','Ashish','Ashish'],
+  ['Bhawana','Harsha','Bharat','Yash','Prerna','Yajur','Bharat','Rosh','Harsha','Rosh','Bhawana','Bharat','Jahnvi','Yajur','Jahnvi','Prerna','Jahnvi','Rosh','Bharat','Prerna','Bhawana','Ashish','Rosh','Jahnvi','Jahnvi','Prerna','Rosh'],
+  ['Bhawana','Bharat','Bharat','Yash','Ashish','Rosh','Bharat','Bharat','Jahnvi','Harsha','Prerna','Jahnvi','Bharat','Harsha','Bharat','Jahnvi','Yash','Ashish','Rosh','Yash','Ashish','Jahnvi','Jahnvi','Ashish','Bharat','Jahnvi','Ashish'],
+  ['Ashish','Bharat','Yajur','Yash','Bhawana','Bharat','Yash','Harsha','Yash','Harsha','Yash','Ashish','Jahnvi','Yash','Jahnvi','Harsha','Ashish','Ashish','Bhawana','Yash','Harsha','Yash','Rosh','Yash','Harsha','Jahnvi','Ashish'],
+  ['Prerna','Bharat','Bharat','Yash','Bhawana','Ashish','Yash','Yajur','Jahnvi','Yash','Prerna','Bharat','Jahnvi','Jahnvi','Bharat','Harsha','Ashish','Ashish','Bhawana','Yash','Bhawana','Harsha','Jahnvi','Yash','Harsha','Bhawana','Ashish'],
+  ['Bhawana','Jahnvi','Bharat','Harsha','Bhawana','Bharat','Yash','Harsha','Yajur','Bhawana','Prerna','Bharat','Rosh','Yash','Yash','Harsha','Yash','Bhawana','Yash','Yash','Bhawana','Harsha','Jahnvi','Bhawana','Jahnvi','Yajur','Ashish'],
+  ['Bharat','Harsha','Jahnvi','Yash','Prerna','Yajur','Yash','Harsha','Harsha','Jahnvi','Bhawana','Bharat','Rosh','Yash','Jahnvi','Jahnvi','Yajur','Bhawana','Ashish','Harsha','Jahnvi','Yajur','Rosh','Yash','Bhawana','Ashish','Prerna'],
+  ['Bhawana','Yajur','Harsha','Ashish','Jahnvi','Bharat','Yash','Ashish','Yajur','Harsha','Rosh','Harsha','Bharat','Yash','Bharat','Harsha','Yajur','Bhawana','Harsha','Prerna','Jahnvi','Yajur','Bhawana','Yash','Jahnvi','Bhawana','Harsha'],
+  ['Bhawana','Harsha','Bharat','Prerna','Yash','Bharat','Bharat','Harsha','Bharat','Jahnvi','Bhawana','Bharat','Yajur','Jahnvi','Bharat','Prerna','Ashish','Rosh','Harsha','Harsha','Bharat','Bhawana','Yash','Yash','Harsha','Bhawana','Ashish'],
+];
+
+function tally(qi) {
+  const c = {};
+  RESPONSES.forEach(r => { const n = r[qi]; if (n) c[n] = (c[n]||0)+1; });
+  const sorted = Object.entries(c)
+    .sort((a,b) => b[1] - a[1])
+    .map(([name, votes]) => ({ name, votes }));
+  if (!sorted.length) return { winners: [], others: [] };
+  const topVotes = sorted[0].votes;
+  return {
+    winners: sorted.filter(r => r.votes === topVotes),
+    others: sorted.filter(r => r.votes < topVotes),
+  };
+}
+
+function winnerHTML(person, rot) {
+  const img = fmap[person.name]?.img || `imgs/${person.name.toLowerCase()}.jpg`;
+  return `
+    <div class="ans-winner">
+      <div class="ans-av-wrap">
+        <div class="pushpin"></div>
+        <div class="ans-polaroid" style="--rot:${rot}deg">
+          <div class="polaroid-photo">
+            <img src="${img}" alt="${person.name}">
+          </div>
+          <div class="polaroid-label">${person.name}</div>
+        </div>
+        ${stickerBadge(person.votes, true, rot + 2)}
+      </div>
+    </div>`;
+}
+
+function polaroidHTML(name, img, size) {
+  const src = img || `imgs/${name.toLowerCase()}.jpg`;
+  return `
+    <div class="polaroid${size ? ' ' + size : ''}">
+      <div class="polaroid-photo"><img src="${src}" alt="${name}"></div>
+      <div class="polaroid-label">${name}</div>
+    </div>`;
+}
+
+function stickerBadge(votes, gold, rot) {
+  const metal = gold ? 'gold' : 'silver';
+  const size = gold ? 'lg' : 'sm';
+  return `<div class="ans-badge sticker ${size} ${metal}" style="--sticker-rot:${rot}deg"><span class="medal-num">${votes}</span></div>`;
+}
+
+// ── BUILD DOM ─────────────────────────────────────────────────────────────────
+const deck = document.getElementById('deck');
+const qCorner = document.getElementById('q-corner');
+
+const home = document.createElement('div');
+home.className = 'slide scrapbook-bg';
+home.id = 'home';
+
+const avatarHTML = FRIENDS.map((f, i) => {
+  const s = SCATTER[i % SCATTER.length];
+  return `<div class="av-wrap" style="left:${s.x}%;top:${s.y}%;transform:translate(-50%,-50%) rotate(${s.rot}deg)">
+    ${polaroidHTML(f.name, f.img)}
+  </div>`;
+}).join('');
+
+home.innerHTML = `
+  <div class="doodle-glass">🍸</div>
+  <div class="avatar-field">${avatarHTML}</div>
+  <div class="home-text">
+    <div class="home-label">
+      <div class="home-title">RSVP<br>Shenanigans</div>
+    </div>
+    <div class="home-sub">Time to see the responses</div>
+  </div>
+`;
+deck.appendChild(home);
+
+const qSlides = [];
+QUESTIONS.forEach((q, i) => {
+  const { winners, others } = tally(i);
+
+  const slide = document.createElement('div');
+  slide.className = 'slide q-slide scrapbook-bg';
+  slide.dataset.phase = 'q';
+  slide.dataset.qi = i;
+
+  slide.innerHTML = `<div class="doodle-glass">🍸</div>`;
+
+  const qInner = document.createElement('div');
+  qInner.className = 'q-inner';
+  qInner.innerHTML = `
+    <div class="q-card">
+      <div class="q-tape-top"></div>
+      <div class="q-tape-side"></div>
+      <div class="q-text">${q}</div>
+      <div class="q-hint">Take your guesses</div>
+    </div>
+  `;
+  slide.appendChild(qInner);
+
+  const aSection = document.createElement('div');
+  aSection.className = 'a-section';
+
+  if (winners.length > 0) {
+    const winnersRow = document.createElement('div');
+    winnersRow.className = 'ans-winners';
+    winnersRow.innerHTML = winners.map((w, j) =>
+      winnerHTML(w, OTHER_ROTS[j % OTHER_ROTS.length])
+    ).join('');
+    aSection.appendChild(winnersRow);
+
+    if (others.length > 0) {
+      const othersRow = document.createElement('div');
+      othersRow.className = 'ans-others';
+      others.forEach((r, j) => {
+        const rImg = fmap[r.name]?.img;
+        const rot = OTHER_ROTS[(j + 2) % OTHER_ROTS.length];
+        const item = document.createElement('div');
+        item.className = 'ans-other';
+        item.innerHTML = `
+          <div class="ans-av-wrap">
+            <div class="ans-polaroid" style="--rot:${rot}deg">
+              <div class="polaroid-photo">
+                <img src="${rImg || 'imgs/' + r.name.toLowerCase() + '.jpg'}" alt="${r.name}">
+              </div>
+              <div class="polaroid-label">${r.name}</div>
+            </div>
+            ${stickerBadge(r.votes, false, OTHER_ROTS[(j + 4) % OTHER_ROTS.length])}
+          </div>`;
+        othersRow.appendChild(item);
+      });
+      aSection.appendChild(othersRow);
+    }
+  }
+
+  slide.appendChild(aSection);
+  deck.appendChild(slide);
+  qSlides.push(slide);
+});
+
+const end = document.createElement('div');
+end.className = 'slide scrapbook-bg';
+end.id = 'end';
+end.innerHTML = `
+  <div class="doodle-glass">🍸</div>
+  <div class="end-text">
+    <div class="home-label">
+      <div class="end-title">That's all folks!</div>
+    </div>
+  </div>
+`;
+deck.appendChild(end);
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+const slides = [home, ...qSlides, end];
+let cur = 0;
+
+function revealAnswers(slide) { slide.dataset.phase = 'a'; }
+function hideAnswers(slide)   { slide.dataset.phase = 'q'; }
+
+function isQSlide(slide) {
+  return slide.classList.contains('q-slide');
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= slides.length) return;
+  slides[cur].classList.remove('active');
+  cur = idx;
+  slides[cur].classList.add('active');
+  updateCorner();
+}
+
+function next() {
+  if (cur === 0) { goTo(1); return; }
+  const slide = slides[cur];
+  if (!isQSlide(slide)) { goTo(cur + 1); return; }
+  if (slide.dataset.phase === 'q') revealAnswers(slide);
+  else goTo(cur + 1);
+}
+
+function prev() {
+  if (cur === 0) return;
+  const slide = slides[cur];
+  if (!isQSlide(slide)) { goTo(cur - 1); return; }
+  if (slide.dataset.phase === 'a') hideAnswers(slide);
+  else goTo(cur - 1);
+}
+
+function updateCorner() {
+  const slide = slides[cur];
+  if (cur === 0 || slide.id === 'end') { qCorner.style.display = 'none'; return; }
+  qCorner.style.display = 'block';
+  qCorner.textContent = `${cur} / ${qSlides.length}`;
+}
+
+document.getElementById('btn-next').addEventListener('click', next);
+document.getElementById('btn-prev').addEventListener('click', prev);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next();
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   prev();
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (dx < -50) next(); if (dx > 50) prev();
+});
+
+goTo(0);
+</script>
+</body>
+</html>
